@@ -14,7 +14,7 @@ def log(text, log_file=log_file):
     file.write(dateAndTime + text + "\r")
     # close the file.
     file.close()
-    return None
+    
 
 
 def dump(log_file=log_file):
