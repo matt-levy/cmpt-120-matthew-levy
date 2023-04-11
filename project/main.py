@@ -3,6 +3,7 @@ from flask import Flask
 from flask import *
 from flask import request 
 from movies import movies
+from logger import *
 
 # create an instance of a Flask object.
 app = Flask(__name__)
@@ -27,6 +28,9 @@ def list_movies():
     # only get the movies that have the same title as the query parameter.
     if titles != []:
         response_body = [movie for movie in movies if movie["title"] in titles]
+
+    # use logger class to log query to log file
+    log(request.method + " " + request.url, log_file)
 
     return jsonify(response_body)
 

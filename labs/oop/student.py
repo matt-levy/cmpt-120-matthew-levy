@@ -8,16 +8,18 @@ class Student(Person):
         self.courses = courses
         super().__init__(first_name, last_name)
     
+    #takes in a string, changes the major of a student
     def change_major(self, new_major):
             self.major = new_major
 
+    #returns the total number of credits the student is taking
     def get_credits(self):
         total_credits = 0
         for course in self.courses:
             total_credits += course.credits
         return total_credits
 
-
+    #calculates and returns the student's GPA
     def get_gpa(self):
         grade_map = {
         "A"  : 4.0,
@@ -42,5 +44,6 @@ class Student(Person):
 
         return total_points/total_credits
 
+    #adds a course to the student's course list
     def add_course(self, course):
         self.courses.append(course)
