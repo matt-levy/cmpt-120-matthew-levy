@@ -77,7 +77,102 @@ def handle_movie(mid: str) -> Response:
                 movies.remove(movie)
                 return Response("No content", 204)
         
+@app.route("/api/movies/<mid>/reviews", methods=["GET", "POST"])
+def handle_reviews(mid: str) -> Response:
+    if request.method == "GET":
+        count = 0
+        if movies == []:
+            return Response("Not Found", 404)
+        for movie in movies:
+            if mid in movie.values():
+                count += 1
+        if count == 0:
+            return Response("Not Found", 404)
+        else:
+            reviews = []
+            for movie in movies:
+                if movie["uuid"] == mid:
+                    reviews = movie["reviews"]
+            return jsonify(reviews)
+    elif request.method == "POST":
+        request_body = request.get_json()
+        
+        count = 0
+        if movies == []:
+            return Response("Not Found", 404)
+        for movie in movies:
+            if mid in movie.values():
+                count += 1
+        if count == 0:
+            return Response("Not Found", 404)
+
+        #check if request body is invalid
+        if request_body == None or request_body == {}:
+            return Response("Bad request", 400)
+        if "username" not in request_body or "score" not in request_body or "review" not in request_body:
+            return Response("Bad request", 400)
+        if request_body["username"] == None or request_body["score"] == None or request_body["review"] == None:
+            return Response("Bad request", 400)
+        elif type(request_body["username"]) != str or type(request_body["score"]) != float or type(request_body["review"]) != str:
+            return Response("Bad request", 400)
+        elif request_body["score"] < 0.0 or request_body["score"] > 10.0:
+            return Response("Bad request", 400)
+        review = {
+            "uuid": uuid.uuid4(),
+            "username": request.get_json()["username"],
+            "score": request.get_json()["score"],
+            "review": request.get_json()["review"]
+        }
+        for movie in movies:
+            if movie["uuid"] == mid:
+                movie["reviews"].append(review)
+                return Response("Created", 201)
+
+
+@app.route("/api/movies/<mid>/reviews/<rid>", methods=["GET", "DELETE"])
+def handle_review(mid: str, rid: str) -> Response:
+    if request.method == "GET":
+        count = 0
+        r_count = 0
+        if movies == []:
+            return Response("Not Found", 404)
+        for movie in movies:
+            if mid in movie.values():
+                count += 1
+                for review in movie["reviews"]:
+                    if rid in review.values():
+                        r_count +=1
+        if count == 0 or r_count == 0:
+            return Response("Not Found", 404)
+        else:
+            for movie in movies:
+                for review in movie["reviews"]:
+                    if rid in review.values():
+                        return jsonify(review)
+        
+    elif request.method == "DELETE":
+        count = 0
+        r_count = 0
+        if movies == []:
+            return Response("Not Found", 404)
+        for movie in movies:
+            if mid == movie["uuid"]:
+                count += 1
+                for review in movie["reviews"]:
+                    if rid == review["uuid"]:
+                        r_count += 1
+                        movie["reviews"].remove(review)
+                        break
+    if count == 0 or r_count == 0:
+        return Response("Not Found", 404)
+    if r_count > 0:
+        return Response("No Content", 204)
+    else:
+        return Response("Review Not Found", 404)
 
 # run our application
 if __name__ == '__main__':
     app.run()
+
+
+
